@@ -34,20 +34,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function preloadImages(list) {
-    // preload ringan: resolve walau error, biar ga nge-freeze
-    await Promise.all(
-      list.map(
-        (src) =>
-          new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-            img.decoding = "async";
-            img.src = src;
-          })
-      )
-    );
-  }
+  await Promise.all(
+    list.map(async (src) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = src;
+      try {
+        await img.decode();   // ini bikin jauh lebih smooth di mobile
+      } catch {
+        // fallback kalau decode ga didukung / error
+        await new Promise((res) => {
+          img.onload = img.onerror = res;
+        });
+      }
+    })
+  );
+}
+
 
   playBtn.addEventListener("click", async () => {
     // audio kadang diblok; tetap lanjut buka flipbook
@@ -98,21 +101,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const H = Math.floor(rect.height);
 
     pageFlip = new St.PageFlip(bookEl, {
-      width: W,
-      height: H,
-      size: "fixed",
-      autoSize: false,
+  width: W,
+  height: H,
+  size: "fixed",
+  autoSize: false,
 
-      usePortrait: true, // SINGLE page
-      showCover: false,
+  usePortrait: true,
+  showCover: false,
 
-      flippingTime: 650,
-      maxShadowOpacity: 0.35,
-      mobileScrollSupport: false,
+  flippingTime: 520,          // lebih smooth & ringan
+  maxShadowOpacity: 0.25,     // shadow lebih ringan
+  mobileScrollSupport: false,
+  disableFlipByClick: true,
 
-      // kita handle tap sendiri
-      disableFlipByClick: true,
-    });
+  // penting untuk performa:
+  useMouseEvents: false,      // hp ga butuh mouse events
+});
+
 
     pageFlip.loadFromHTML(document.querySelectorAll("#book .page"));
 

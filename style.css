@@ -270,3 +270,21 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 #book .stf__item{
   background: transparent !important;
 }
+
+/* mobile smoothness */
+#book,
+#book *{
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+
+#book{
+  touch-action: manipulation; /* biar tap ga dianggap scroll/zoom */
+}
+
+/* optional: kurangi blur/paint berat */
+#book{
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+}
