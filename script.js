@@ -12,20 +12,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookScreen = document.getElementById("bookScreen");
   const playBtn = document.getElementById("playBtn");
   const bgm = document.getElementById("bgm");
+
+  const wrap = document.querySelector(".single-wrap");
   const bookEl = document.getElementById("book");
 
-  if (!landing || !bookScreen || !playBtn || !bgm || !bookEl) return;
+  if (!landing || !bookScreen || !playBtn || !bgm || !wrap || !bookEl) {
+    console.error("Missing element:", { landing, bookScreen, playBtn, bgm, wrap, bookEl });
+    return;
+  }
 
   let pageFlip = null;
 
-  pages.forEach(src => {
-    const img = new Image();
-    img.src = src;
-    if (img.decode) img.decode().catch(()=>{});
-  });
-
   playBtn.addEventListener("click", async () => {
-    try { await bgm.play(); } catch(e){}
+    try { await bgm.play(); } catch (e) {}
 
     landing.classList.add("hidden");
     bookScreen.classList.remove("hidden");
@@ -36,10 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function initFlipbook() {
-    const wrap = bookEl.parentElement; // .single-wrap
+    if (!window.St || !window.St.PageFlip) {
+      console.error("PageFlip CDN belum keload (St.PageFlip missing).");
+      return;
+    }
+
     const rect = wrap.getBoundingClientRect();
-    const W = Math.round(rect.width);
-    const H = Math.round(rect.height);
+    const W = Math.max(1, Math.round(rect.width));
+    const H = Math.max(1, Math.round(rect.height));
 
     bookEl.style.width = W + "px";
     bookEl.style.height = H + "px";
@@ -48,21 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
       width: W,
       height: H,
       size: "fixed",
-
       usePortrait: true,
       showCover: true,
-
-      maxShadowOpacity: 0.45,
       flippingTime: 650,
+      maxShadowOpacity: 0.45,
       mobileScrollSupport: false,
-
       disableFlipByClick: true,
     });
 
     const imgs = pages.map((src) => {
       const img = document.createElement("img");
       img.src = src;
-      img.alt = "page";
       img.draggable = false;
       img.style.width = "100%";
       img.style.height = "100%";
@@ -81,13 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", async () => {
       await raf2();
-      try { pageFlip.destroy(); } catch(e){}
-      pageFlip = null;
-      initFlipbook();
-    }, { passive: true });
+      const rr = wrap.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rr.width));
+      const h = Math.max(1, Math.round(rr.height));
+      pageFlip.update({ width: w, height: h, size: "fixed" });
+    });
   }
 
-  function raf2(){
-    return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  function raf2() {
+    return new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    );
   }
 });
