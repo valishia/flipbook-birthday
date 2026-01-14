@@ -1,16 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const pages = [
     "./pages/page-01.png",
-    "./pages/page-01.png",
-    "./pages/page-02.png",
     "./pages/page-02.png",
     "./pages/page-03.png",
-    "./pages/page-03.png",
-    "./pages/page-04.png",
     "./pages/page-04.png",
     "./pages/page-05.png",
-    "./pages/page-05.png",
-    "./pages/page-06.png",
     "./pages/page-06.png",
   ];
 
@@ -30,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const raf = () => new Promise((r) => requestAnimationFrame(r));
 
-  async function waitForSize(el, tries = 90) {
+  async function waitForSize(el, tries = 120) {
     for (let i = 0; i < tries; i++) {
       const rect = el.getBoundingClientRect();
       if (rect.width > 50 && rect.height > 50) return rect;
@@ -40,13 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function preloadImages(list) {
+    // preload ringan: resolve walau error, biar ga nge-freeze
     await Promise.all(
       list.map(
         (src) =>
           new Promise((resolve) => {
             const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
             img.decoding = "async";
             img.src = src;
           })
@@ -55,11 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   playBtn.addEventListener("click", async () => {
-    try { await bgm.play(); } catch (e) {}
+    // audio kadang diblok; tetap lanjut buka flipbook
+    try {
+      await bgm.play();
+    } catch (e) {}
 
     landing.classList.add("hidden");
     bookScreen.classList.remove("hidden");
 
+    // tunggu layout kebentuk
     await raf();
     await raf();
 
@@ -84,11 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function initFlipbook(rect) {
+    // inject pages
     bookEl.innerHTML = pages
       .map(
         (src) => `
           <div class="page">
-            <img src="${src}" alt="page" draggable="false" loading="eager" decoding="async"/>
+            <img src="${src}" alt="page" draggable="false" loading="eager" decoding="async" />
           </div>
         `
       )
@@ -103,46 +103,66 @@ document.addEventListener("DOMContentLoaded", () => {
       size: "fixed",
       autoSize: false,
 
-      usePortrait: true,
+      usePortrait: true, // SINGLE page
       showCover: false,
 
-      flippingTime: 700,
+      flippingTime: 650,
       maxShadowOpacity: 0.35,
       mobileScrollSupport: false,
 
+      // kita handle tap sendiri
       disableFlipByClick: true,
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll("#book .page"));
 
-    // ====== ANTI SKIP / ANTI DOUBLE TAP ======
+    // =========================
+    // ANTI-SKIP (REAL FIX)
+    // =========================
+    // Source skip paling sering:
+    // - tap kebaca 2x (pointerup + click)
+    // - user tap saat animasi masih jalan
+    // Solusi: lock berdasarkan state animasi PageFlip
+
     let locked = false;
 
-    function lockFor(ms) {
-      locked = true;
-      window.setTimeout(() => (locked = false), ms);
-    }
+    // state names biasanya: "read", "fold_corner", "user_fold", "flipping"
+    // kita treat selain "read" = lagi proses -> lock
+    pageFlip.on("changeState", (state) => {
+      locked = state !== "read";
+    });
 
-    // kalau PageFlip kasih event flip selesai, unlock juga
+    // fallback unlock kalau flip event sudah kejadian
     pageFlip.on("flip", () => {
-      // flip event biasanya muncul setelah selesai pindah page
       locked = false;
     });
 
-    // gunakan pointerup (lebih stabil daripada click)
+    // Jangan biarkan click bawaan browser ikut jalan
+    bookEl.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // Tap handler utama
     bookEl.addEventListener(
       "pointerup",
       (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (locked) return;
+        if (!pageFlip) return;
+        if (locked) return; // kalau lagi animasi, ignore
 
         const r = bookEl.getBoundingClientRect();
         const x = e.clientX - r.left;
 
-        locked = true;          // lock immediately
-        lockFor(750);           // fallback unlock (sedikit > flippingTime)
+        // lock manual sebentar untuk anti double-tap super cepat
+        locked = true;
+        window.setTimeout(() => {
+          // kalau masih animasi, changeState akan tetap lock
+          // kalau sudah read, ini membuka lagi
+          locked = false;
+        }, 500);
 
         if (x > r.width / 2) pageFlip.flipNext();
         else pageFlip.flipPrev();
@@ -150,21 +170,28 @@ document.addEventListener("DOMContentLoaded", () => {
       { passive: false }
     );
 
-    // cegah drag / select yang kadang bikin event dobel
+    // cegah drag / select
     bookEl.addEventListener("dragstart", (e) => e.preventDefault());
+    bookEl.addEventListener("touchmove", (e) => e.preventDefault(), {
+      passive: false,
+    });
 
-    // resize fix
+    // Resize update (mobile rotate)
+    let resizeTimer = null;
     window.addEventListener("resize", async () => {
       if (!pageFlip) return;
-      await raf();
-      const rr = bookEl.getBoundingClientRect();
-      pageFlip.update({
-        width: Math.floor(rr.width),
-        height: Math.floor(rr.height),
-        size: "fixed",
-        autoSize: false,
-        usePortrait: true
-      });
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(async () => {
+        await raf();
+        const rr = bookEl.getBoundingClientRect();
+        pageFlip.update({
+          width: Math.floor(rr.width),
+          height: Math.floor(rr.height),
+          size: "fixed",
+          autoSize: false,
+          usePortrait: true,
+        });
+      }, 150);
     });
   }
 });

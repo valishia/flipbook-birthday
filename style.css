@@ -64,7 +64,7 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 /* wrapper: 1 kartu besar di tengah */
 .single-wrap{
   height:min(82vh, 920px);
-  aspect-ratio: 3 / 4.2;
+  aspect-ratio: 3 / 4;
   max-width:92vw;
   position:relative;
   display:grid;
@@ -86,16 +86,25 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 }
 
 /* halaman yang di-inject JS */
+/* halaman yang di-inject JS */
 #book .page{
   width:100%;
   height:100%;
+  background:#fff;
+  display:flex;                 /* center */
+  align-items:center;           /* center */
+  justify-content:center;       /* center */
 }
 
+/* JANGAN width/height 100% lagi */
 #book .page img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;           /* aman, gak crop */
   display:block;
+
   pointer-events:none;
   user-select:none;
   -webkit-user-drag:none;
@@ -131,4 +140,133 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 
 @keyframes spin{
   to{ transform: rotate(360deg); }
+}
+
+/* ============================= */
+/* RESPONSIVE (HP biar rapih)    */
+/* tempel di paling bawah CSS    */
+/* ============================= */
+
+/* biar center stabil & ga ada “loncat” pas address bar mobile berubah */
+.screen{
+  min-height: 100vh;
+  min-height: 100dvh; /* mobile modern */
+}
+
+/* wrapper default desktop: kasih batas max biar ga kegedean */
+.single-wrap{
+  width: min(520px, 92vw);
+}
+
+/* tablet */
+@media (max-width: 900px){
+  .single-wrap{
+    width: min(460px, 92vw);
+    height: min(80vh, 860px);
+  }
+}
+
+/* mobile */
+@media (max-width: 600px){
+  .screen{
+    padding: 14px;
+  }
+
+  .single-wrap{
+    width: 92vw;
+    height: 78vh;        /* stabil */
+    height: 78dvh;       /* stabil di mobile */
+    aspect-ratio: 3 / 4.2;
+  }
+
+  /* rounded lebih halus di hp */
+  #book{
+    border-radius: 14px;
+  }
+}
+
+/* very small phones */
+@media (max-width: 420px){
+  .single-wrap{
+    width: 94vw;
+    height: 76vh;
+    height: 76dvh;
+  }
+
+  .card{
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+
+  h1{
+    font-size: 22px;
+  }
+}
+
+/* Optional: bikin render lebih halus */
+#book, #book *{
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+}
+
+/* ===== FIX PageFlip: paksa semua layer center & full size ===== */
+
+/* container utama pageflip */
+#book{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* pageflip wrapper/canvas biasanya bikin posisi top-left */
+#book .stf__parent,
+#book .stf__wrapper,
+#book .stf__block,
+#book .stf__item{
+  width:100% !important;
+  height:100% !important;
+  top:0 !important;
+  left:0 !important;
+}
+
+/* halaman/page supaya ikut full size (ini yang bikin gak “nempel atas”) */
+#book .stf__item{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* pastiin div .page kamu ngisi penuh */
+#book .page{
+  width:100% !important;
+  height:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:#fff !important;
+}
+
+/* gambar harus ikut tengah dan gak kepotong */
+#book .page img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  display:block !important;
+}
+
+/* hilangkan putih “belakang” */
+#book{
+  background: transparent !important;
+}
+
+#book .page{
+  background: transparent !important;
+}
+
+/* kalau wrapper internal masih putih */
+#book .stf__parent,
+#book .stf__wrapper,
+#book .stf__block,
+#book .stf__item{
+  background: transparent !important;
 }
