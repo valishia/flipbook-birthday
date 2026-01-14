@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Story of You</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <section id="landing" class="screen">
+    <div class="card">
+      <div class="icon">🎵</div>
+      <h1>Do you wanna play a music?</h1>
+      <button id="playBtn" class="btn">Play</button>
+      <p class="hint">Tap Play to start the music & open your present.</p>
+    </div>
+  </section>
+
+  <section id="bookScreen" class="screen hidden">
+    <div class="single-wrap">
+      <div id="book"></div>
+    </div>
+  </section>
+
+  <audio id="bgm" src="audio/song.mp3" loop preload="auto"></audio>
+
+  <!-- PageFlip engine (balik lagi biar efeknya kaya awal) -->
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
