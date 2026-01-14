@@ -8,7 +8,7 @@
 html, body{
   height:100%;
   margin:0;
-  overflow:hidden; /* biar ga ada scroll -> ga geser */
+  overflow:hidden;
 }
 
 body{
@@ -17,7 +17,6 @@ body{
   color:#fff;
 }
 
-/* overlay fixed + center stabil */
 .screen{
   position:fixed;
   inset:0;
@@ -29,7 +28,6 @@ body{
 
 .hidden{ display:none !important; }
 
-/* landing */
 .card{
   width:min(520px, 92vw);
   background:rgba(255,255,255,0.06);
@@ -57,7 +55,6 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 }
 .btn:active{ transform:scale(.98); }
 
-/* wrapper 1 halaman, selalu portrait */
 .single-wrap{
   height:min(82vh, 920px);
   aspect-ratio: 3 / 4.2;
@@ -67,7 +64,6 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
   place-items:center;
 }
 
-/* book root: dipaku absolute supaya engine ga dorong layout */
 #book{
   position:absolute;
   inset:0;
