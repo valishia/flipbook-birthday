@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Story of You</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="preload" as="image" href="pages/page-01.png">
-  <link rel="preload" as="image" href="pages/page-02.png">
 
+  <!-- optional preload (biar lebih cepat di Netlify) -->
+  <link rel="preload" as="audio" href="./audio/song.mp3">
+  <link rel="preload" as="image" href="./pages/page-01.png">
 </head>
 <body>
 
@@ -15,7 +16,7 @@
     <div class="card">
       <div class="icon">🎵</div>
       <h1>Do you wanna play a music?</h1>
-      <button id="playBtn" class="btn">Play</button>
+      <button id="playBtn" class="btn" type="button">Play</button>
       <p class="hint">Tap Play to start the music & open your present.</p>
     </div>
   </section>
@@ -23,11 +24,18 @@
   <section id="bookScreen" class="screen hidden">
     <div class="single-wrap">
       <div id="book"></div>
+      <div id="loader" class="loader hidden">
+        <div>
+          <div class="spinner"></div>
+          <div class="loader-text">Loading pages…</div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <audio id="bgm" src="audio/song.mp3" loop preload="auto"></audio>
+  <audio id="bgm" src="./audio/song.mp3" loop preload="auto"></audio>
 
+  <!-- IMPORTANT: PageFlip CDN harus sebelum script.js -->
   <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
   <script src="script.js"></script>
 </body>

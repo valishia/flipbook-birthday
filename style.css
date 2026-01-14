@@ -1,7 +1,15 @@
-:root{ --bg:#0b1620; --btn:#1d4ed8; }
+:root{
+  --bg:#0b1620;
+  --btn:#1d4ed8;
+}
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; margin:0; overflow:hidden; }
+
+html, body{
+  height:100%;
+  margin:0;
+  overflow:hidden; /* biar gak ada scroll -> gak “naik” */
+}
 
 body{
   background:var(--bg);
@@ -9,7 +17,7 @@ body{
   color:#fff;
 }
 
-/* layar selalu center */
+/* screen overlay fixed, center stabil */
 .screen{
   position:fixed;
   inset:0;
@@ -18,6 +26,7 @@ body{
   padding:24px;
   background:var(--bg);
 }
+
 .hidden{ display:none !important; }
 
 /* landing */
@@ -31,6 +40,7 @@ body{
   backdrop-filter: blur(8px);
   box-shadow:0 18px 60px rgba(0,0,0,.35);
 }
+
 .icon{ font-size:54px; margin-bottom:8px; }
 h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 .hint{ margin:14px 0 0; opacity:.75; font-size:13px; }
@@ -47,7 +57,11 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 }
 .btn:active{ transform:scale(.98); }
 
-/* wrapper buku: 1 halaman */
+/* pastiin tombol selalu clickable */
+#landing{ z-index:50; }
+#playBtn{ position:relative; z-index:60; }
+
+/* wrapper: 1 kartu besar di tengah */
 .single-wrap{
   height:min(82vh, 920px);
   aspect-ratio: 3 / 4.2;
@@ -57,83 +71,64 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
   place-items:center;
 }
 
-/* area book */
+/* BOOK CONTAINER (PageFlip) */
 #book{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  border-radius:18px;
+  border-radius:5px;
   overflow:hidden;
   background:#fff;
   box-shadow:0 18px 60px rgba(0,0,0,.40);
   user-select:none;
-  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== FALLBACK FLIP STRUCTURE ===== */
-.fb{
-  position:absolute;
-  inset:0;
-  perspective:1400px;
-  border-radius:18px;
-  overflow:hidden;
-}
-
-/* halaman tujuan (background) */
-.fb-bg{
-  position:absolute;
-  inset:0;
-  background-size:cover;
-  background-position:center;
-}
-
-/* sheet yang “dibalik” (setengah kanan/kiri) */
-.fb-sheet{
-  position:absolute;
-  top:0;
+/* halaman yang di-inject JS */
+#book .page{
+  width:100%;
   height:100%;
-  width:50%;
-  background-repeat:no-repeat;
-  backface-visibility:hidden;
-  transform-style:preserve-3d;
 }
 
-/* shadow biar lebih paper-ish */
-.fb-shadow{
+#book .page img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+/* LOADER */
+.loader{
   position:absolute;
   inset:0;
-  pointer-events:none;
-  opacity:0;
-  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.22), rgba(0,0,0,0) 60%);
+  display:grid;
+  place-items:center;
+  background: rgba(11,22,32,.55);
+  border-radius:18px;
+  z-index:5;
 }
 
-/* NEXT: balik dari kanan ke kiri */
-.turn-next .fb-sheet{
-  left:50%;
-  transform-origin:left center;
-  background-size:200% 100%;
-  background-position:right center;
-  animation: turnNext .56s forwards cubic-bezier(.2,.8,.2,1);
-}
-.turn-next .fb-shadow{ opacity:1; transition:opacity .2s; }
-
-@keyframes turnNext{
-  from{ transform: rotateY(0deg); }
-  to  { transform: rotateY(-180deg); }
+.spinner{
+  width:46px;
+  height:46px;
+  border-radius:999px;
+  border:4px solid rgba(255,255,255,.25);
+  border-top-color: rgba(255,255,255,.95);
+  animation: spin 0.9s linear infinite;
+  margin:0 auto;
 }
 
-/* PREV: balik dari kiri ke kanan */
-.turn-prev .fb-sheet{
-  left:0;
-  transform-origin:right center;
-  background-size:200% 100%;
-  background-position:left center;
-  animation: turnPrev .56s forwards cubic-bezier(.2,.8,.2,1);
+.loader-text{
+  margin-top:12px;
+  font-size:13px;
+  opacity:.9;
+  text-align:center;
 }
-.turn-prev .fb-shadow{ opacity:1; transition:opacity .2s; }
 
-@keyframes turnPrev{
-  from{ transform: rotateY(0deg); }
-  to  { transform: rotateY(180deg); }
+@keyframes spin{
+  to{ transform: rotate(360deg); }
 }
