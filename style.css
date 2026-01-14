@@ -1,15 +1,7 @@
-:root{
-  --bg:#0b1620;
-  --btn:#1d4ed8;
-}
+:root{ --bg:#0b1620; --btn:#1d4ed8; }
 
 *{ box-sizing:border-box; }
-
-html, body{
-  height:100%;
-  margin:0;
-  overflow:hidden;
-}
+html,body{ height:100%; margin:0; overflow:hidden; }
 
 body{
   background:var(--bg);
@@ -17,6 +9,7 @@ body{
   color:#fff;
 }
 
+/* layar selalu center */
 .screen{
   position:fixed;
   inset:0;
@@ -25,9 +18,9 @@ body{
   padding:24px;
   background:var(--bg);
 }
-
 .hidden{ display:none !important; }
 
+/* landing */
 .card{
   width:min(520px, 92vw);
   background:rgba(255,255,255,0.06);
@@ -38,7 +31,6 @@ body{
   backdrop-filter: blur(8px);
   box-shadow:0 18px 60px rgba(0,0,0,.35);
 }
-
 .icon{ font-size:54px; margin-bottom:8px; }
 h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 .hint{ margin:14px 0 0; opacity:.75; font-size:13px; }
@@ -55,6 +47,7 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
 }
 .btn:active{ transform:scale(.98); }
 
+/* wrapper buku: 1 halaman */
 .single-wrap{
   height:min(82vh, 920px);
   aspect-ratio: 3 / 4.2;
@@ -64,6 +57,7 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
   place-items:center;
 }
 
+/* area book */
 #book{
   position:absolute;
   inset:0;
@@ -72,5 +66,74 @@ h1{ margin:0 0 14px; font-size:26px; font-weight:750; }
   border-radius:18px;
   overflow:hidden;
   background:#fff;
-  box-shadow: 0 18px 60px rgba(0,0,0,.40);
+  box-shadow:0 18px 60px rgba(0,0,0,.40);
+  user-select:none;
+  cursor:pointer;
+}
+
+/* ===== FALLBACK FLIP STRUCTURE ===== */
+.fb{
+  position:absolute;
+  inset:0;
+  perspective:1400px;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+/* halaman tujuan (background) */
+.fb-bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+}
+
+/* sheet yang “dibalik” (setengah kanan/kiri) */
+.fb-sheet{
+  position:absolute;
+  top:0;
+  height:100%;
+  width:50%;
+  background-repeat:no-repeat;
+  backface-visibility:hidden;
+  transform-style:preserve-3d;
+}
+
+/* shadow biar lebih paper-ish */
+.fb-shadow{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.22), rgba(0,0,0,0) 60%);
+}
+
+/* NEXT: balik dari kanan ke kiri */
+.turn-next .fb-sheet{
+  left:50%;
+  transform-origin:left center;
+  background-size:200% 100%;
+  background-position:right center;
+  animation: turnNext .56s forwards cubic-bezier(.2,.8,.2,1);
+}
+.turn-next .fb-shadow{ opacity:1; transition:opacity .2s; }
+
+@keyframes turnNext{
+  from{ transform: rotateY(0deg); }
+  to  { transform: rotateY(-180deg); }
+}
+
+/* PREV: balik dari kiri ke kanan */
+.turn-prev .fb-sheet{
+  left:0;
+  transform-origin:right center;
+  background-size:200% 100%;
+  background-position:left center;
+  animation: turnPrev .56s forwards cubic-bezier(.2,.8,.2,1);
+}
+.turn-prev .fb-shadow{ opacity:1; transition:opacity .2s; }
+
+@keyframes turnPrev{
+  from{ transform: rotateY(0deg); }
+  to  { transform: rotateY(180deg); }
 }
