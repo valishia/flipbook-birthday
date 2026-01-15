@@ -40,9 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
       img.decoding = "async";
       img.src = src;
       try {
-        await img.decode();   // ini bikin jauh lebih smooth di mobile
+        await img.decode();
       } catch {
-        // fallback kalau decode ga didukung / error
         await new Promise((res) => {
           img.onload = img.onerror = res;
         });
@@ -53,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   playBtn.addEventListener("click", async () => {
-    // audio kadang diblok; tetap lanjut buka flipbook
     try {
       await bgm.play();
     } catch (e) {}
@@ -61,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
     landing.classList.add("hidden");
     bookScreen.classList.remove("hidden");
 
-    // tunggu layout kebentuk
     await raf();
     await raf();
 
@@ -86,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function initFlipbook(rect) {
-    // inject pages
     bookEl.innerHTML = pages
       .map(
         (src) => `
@@ -109,46 +105,32 @@ document.addEventListener("DOMContentLoaded", () => {
   usePortrait: true,
   showCover: false,
 
-  flippingTime: 520,          // lebih smooth & ringan
-  maxShadowOpacity: 0.25,     // shadow lebih ringan
+  flippingTime: 520,
+  maxShadowOpacity: 0.25,
   mobileScrollSupport: false,
   disableFlipByClick: true,
 
-  // penting untuk performa:
-  useMouseEvents: false,      // hp ga butuh mouse events
+  useMouseEvents: false,
 });
 
 
     pageFlip.loadFromHTML(document.querySelectorAll("#book .page"));
 
-    // =========================
-    // ANTI-SKIP (REAL FIX)
-    // =========================
-    // Source skip paling sering:
-    // - tap kebaca 2x (pointerup + click)
-    // - user tap saat animasi masih jalan
-    // Solusi: lock berdasarkan state animasi PageFlip
-
     let locked = false;
 
-    // state names biasanya: "read", "fold_corner", "user_fold", "flipping"
-    // kita treat selain "read" = lagi proses -> lock
     pageFlip.on("changeState", (state) => {
       locked = state !== "read";
     });
 
-    // fallback unlock kalau flip event sudah kejadian
     pageFlip.on("flip", () => {
       locked = false;
     });
 
-    // Jangan biarkan click bawaan browser ikut jalan
     bookEl.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
 
-    // Tap handler utama
     bookEl.addEventListener(
       "pointerup",
       (e) => {
@@ -156,16 +138,13 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
 
         if (!pageFlip) return;
-        if (locked) return; // kalau lagi animasi, ignore
+        if (locked) return;
 
         const r = bookEl.getBoundingClientRect();
         const x = e.clientX - r.left;
 
-        // lock manual sebentar untuk anti double-tap super cepat
         locked = true;
         window.setTimeout(() => {
-          // kalau masih animasi, changeState akan tetap lock
-          // kalau sudah read, ini membuka lagi
           locked = false;
         }, 500);
 
@@ -175,13 +154,11 @@ document.addEventListener("DOMContentLoaded", () => {
       { passive: false }
     );
 
-    // cegah drag / select
     bookEl.addEventListener("dragstart", (e) => e.preventDefault());
     bookEl.addEventListener("touchmove", (e) => e.preventDefault(), {
       passive: false,
     });
 
-    // Resize update (mobile rotate)
     let resizeTimer = null;
     window.addEventListener("resize", async () => {
       if (!pageFlip) return;
